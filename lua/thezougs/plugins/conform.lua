@@ -1,37 +1,42 @@
 return {
 	"stevearc/conform.nvim",
-	event = { "BufWritePre" },
+	event = { "BufReadPre", "BufNewFile" },
 	config = function()
-		local bdi_path = vim.env.BDI
+		local conform = require("conform")
 
-		if not bdi_path then
-			vim.schedule(function()
-				vim.notify(
-					"ERROR: $BDI environment variable is not set. clang_format will likely fail.",
-					vim.log.levels.ERROR
-				)
-			end)
-			return
-		end
-
-		local style_path = "-style=file:" .. bdi_path .. "/rt/.clang-format"
-
-		require("conform").setup({
-			format_on_save = {
-				timheout_ms = 500,
-				lsp_fallback = true,
-			},
+		conform.setup({
 			formatters_by_ft = {
-				cpp = { "clang_format" },
-				c = { "clang_format" },
+				cpp = { "bdi_formatter" },
+				c = { "bdi_formatter" },
+				python = { "bdi_formatter" },
+				typescript = { "bdi_formatter" },
+				javascript = { "bdi_formatter" },
+				lua = { "bdi_formatter" },
+				bazel = { "bdi_formatter" },
+				bzl = { "bdi_formatter" },
 			},
 			formatters = {
-				clang_format = {
-					args = {
-						style_path,
-					},
+				bdi_formatter = {
+					-- Point directly to the compiled bazel-bin executable (Fastest)
+					-- command = vim.fn.expand(""),
+					args = { "$FILENAME" },
+					stdin = false,
 				},
 			},
+			format_on_save = {
+				lsp_fallback = true,
+				async = false,
+				timeout_ms = 2000,
+			},
 		})
+
+		-- Optional keymap to trigger formatting manually
+		vim.keymap.set({ "n", "v" }, "<leader>mp", function()
+			conform.format({
+				lsp_fallback = true,
+				async = false,
+				timeout_ms = 2000,
+			})
+		end, { desc = "Format file or range" })
 	end,
 }

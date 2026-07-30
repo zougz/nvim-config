@@ -1,5 +1,7 @@
 return {
 	"nvim-treesitter/nvim-treesitter",
+	-- Pin to the stable legacy branch to prevent breaking 'configs' module errors
+	branch = "master",
 
 	-- The 'build' step is necessary for Treesitter to work.
 	build = ":TSUpdate",
@@ -15,7 +17,6 @@ return {
 				"c",
 				"cpp",
 				"vimdoc",
-				"vim",
 				"lua",
 				"rust",
 				"groovy",
