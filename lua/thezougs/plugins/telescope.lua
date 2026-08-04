@@ -28,6 +28,13 @@ return {
     telescope.setup({
       defaults = {
         path_display = { "smart" },
+        layout_strategy = "bottom_pane",
+        layout_config = {
+          bottom_pane = {
+            height = 0.5,
+            preview_cutoff = 0,
+          },
+        },
         vimgrep_arguments = {
             'rg',
             '--color=never',
@@ -53,12 +60,29 @@ return {
 
     telescope.load_extension("fzf")
 
+    -- prompt for a search directory, defaulting to the current file's directory
+    local function prompt_dir()
+      local default_dir = vim.fn.expand('%:p:h')
+      local dir = vim.fn.input('Search directory > ', default_dir, 'dir')
+      if dir == '' then
+        return default_dir
+      end
+      return dir
+    end
+
     -- set keymaps
     local keymap = vim.keymap -- for conciseness
     keymap.set('n', '<leader>pf', builtin.find_files, {})
+    keymap.set('n', '<leader>pF', function()
+        builtin.find_files({ cwd = prompt_dir() })
+    end)
     keymap.set('n', '<C-p>', builtin.git_files, {})
     keymap.set('n', '<leader>ps', function()
         builtin.grep_string({ search = vim.fn.input("Grep > ") })
+    end)
+    keymap.set('n', '<leader>pS', function()
+        local dir = prompt_dir()
+        builtin.grep_string({ search = vim.fn.input("Grep > "), cwd = dir })
     end)
     keymap.set('n', '<leader>vh', builtin.help_tags, {})
  end,
